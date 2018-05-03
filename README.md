@@ -3,6 +3,9 @@
 Allows the importing and exporting of a standard $this->data formatted array to and from csv files.
 Doesn't currently support HABTM.
 
+## Install with Composer
+```composer require "proloser/cakephp-csv":"*@dev"```
+
 ## Options
 
 Importing, exporting and setup come with the same options and default values
