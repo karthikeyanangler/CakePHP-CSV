@@ -24,6 +24,7 @@ class CsvBehavior extends Behavior
         'headers' => true,
         'text' => false,
         'excel_bom' => false,
+        'unset' => [],
     ];
 
     /**
@@ -137,6 +138,15 @@ class CsvBehavior extends Behavior
             $firstRecord = true;
             foreach ($data as $record) {
                 $record = $record->toArray();
+                
+                // Remove if unset array set in options
+                if(is_array($options['unset']) && count($options['unset']) > 0){
+                    // set array value as key for $options['unset']
+                    $options['unset'] = array_combine($options['unset'], $options['unset']);
+
+                    $record = array_diff_key($record, $options['unset']);
+                }
+
                 $row = array();
                 foreach ($record as $field => $value) {
                     if ( !is_array($value) ) {
@@ -162,8 +172,11 @@ class CsvBehavior extends Behavior
                 $firstRecord = false;
             }
 
-            if ($options['headers']) {
-                // write the 1st row as headings
+            if(is_array($options['headers']) && count($options['headers']) > 0) {
+                // write the 1st row as headings with given headers
+                fputcsv($file, $options['headers'], $options['delimiter'], $options['enclosure']);
+            }else if($options['headers']) {
+                // write the 1st row as headings with default headers
                 fputcsv($file, $headers, $options['delimiter'], $options['enclosure']);
             }
             // Row counter
@@ -185,9 +198,9 @@ class CsvBehavior extends Behavior
     }
 
     protected function _trigger($callback, $parameters) {
-        if (method_exists($this->_table, $callback)) {
+        if(method_exists($this->_table, $callback)) {
             return call_user_func_array(array($this->_table, $callback), $parameters);
-        } else {
+        }else {
             return true;
         }
     }
